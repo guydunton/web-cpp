@@ -7,6 +7,12 @@
 namespace Web {
 
 	template <typename T>
+	std::ostream& WriteToStream(std::ostream& stream, const T& data)
+	{
+		return stream << data;
+	}
+
+	template <typename T>
 	class HtmlBase {
 		using AnyStreamFunctionPtr = std::ostream&(*)(std::ostream&, const std::any&);
 
@@ -15,7 +21,7 @@ namespace Web {
 
 	public:
 		template <typename... Args>
-		HtmlBase(Args&&... args) :
+		HtmlBase(Args&&... args) noexcept :
 			streamFunc(dataStreamFunc<Args...>()),
 			data(std::tuple(std::forward<Args>(args)...))
 		{}
@@ -28,13 +34,13 @@ namespace Web {
 		}
 
 		template <typename... Args>
-		static AnyStreamFunctionPtr dataStreamFunc() {
+		AnyStreamFunctionPtr dataStreamFunc() const {
 			using AnyType = std::tuple<std::decay_t<Args>...>;
 
 			return [](std::ostream& stream, const std::any& data) -> std::ostream& {
 				try {
-					const auto children = std::any_cast<AnyType>(data);
-					std::apply([&stream](const auto&... item) { ((stream << item), ...); }, children);
+					const auto& children = std::any_cast<const AnyType&>(data);
+					std::apply([&stream](const auto&... item) { (WriteToStream(stream, item), ...); }, children);
 				}
 				catch (std::bad_any_cast& /*e*/) {
 					stream << "Failed to evaluate children";
@@ -49,54 +55,28 @@ namespace Web {
 		return base.streamOut(str);
 	}
 
+#define WEB_HTML_TAG_NO_VALIDATION(NAME, TAG) 		\
+class NAME : public HtmlBase<NAME> {				\
+	static constexpr std::string_view tag = TAG;	\
+public:												\
+	template <typename... Args>						\
+	explicit NAME(Args&&... args) noexcept :		\
+		HtmlBase<NAME>(std::forward<Args>(args)...)	\
+	{}												\
+};
 
-	class P : public HtmlBase<P> {
-		static constexpr std::string_view tag = "p";
-
-	public:
-		template <typename... Args>
-		explicit P(Args&&... args) :
-			HtmlBase<P>(std::forward<Args>(args)...)
-		{}
-	};
-
-	class H1 : public HtmlBase<H1> {
-		static constexpr std::string_view tag = "h1";
-
-	public:
-		template <typename... Args>
-		explicit H1(Args&&... args) :
-			HtmlBase<H1>(std::forward<Args>(args)...)
-		{}
-	};
-	
-	class Div : public HtmlBase<Div> {
-		static constexpr std::string_view tag = "div";
-
-	public:
-		template <typename... Args>
-		explicit Div(Args&&... args) :
-			HtmlBase<Div>(std::forward<Args>(args)...)
-		{}
-	};
-
-	class Body : public HtmlBase<Body> {
-		static constexpr std::string_view tag = "body";
-
-	public:
-		template <typename... Args>
-		explicit Body(Args&&... args) :
-			HtmlBase<Body>(std::forward<Args>(args)...)
-		{
-		}
-	};
+	WEB_HTML_TAG_NO_VALIDATION(H2, "h2");
+	WEB_HTML_TAG_NO_VALIDATION(P, "p");
+	WEB_HTML_TAG_NO_VALIDATION(H1, "h1");
+	WEB_HTML_TAG_NO_VALIDATION(Div, "div");
+	WEB_HTML_TAG_NO_VALIDATION(Body, "body");
 
 	class Html : public HtmlBase<Html> {
 		static constexpr std::string_view tag = "html";
 
 	public:
 		template <typename... Args>
-		explicit Html(Args&&... args) :
+		explicit Html(Args&&... args) noexcept :
 			HtmlBase<Html>(std::forward<Args>(args)...)
 		{
 			static_assert((0 + ... + (std::is_same_v<std::decay_t<Args>, Body> ? 1 : 0)) == 1, 
