@@ -14,6 +14,10 @@ if (MSVC)
 	target_compile_options(web-tests PUBLIC /W4 /std:c++17 /permissive-)
 else()
 	target_compile_options(web-tests PUBLIC -Wall -Wextra -Wpedantic)
+	
+	if (ENABLE_COVERAGE)
+		target_compile_options(web-tests PUBLIC --coverage -O0)
+	endif()
 endif()
 
 if (NOT MSVC)
