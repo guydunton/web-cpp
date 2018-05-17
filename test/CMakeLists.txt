@@ -3,6 +3,7 @@ project(web-tests)
 
 add_executable(web-tests 
 	main.cpp
+	basic-test.cpp
 )
 
 target_include_directories(web-tests PUBLIC ../include)
@@ -19,4 +20,4 @@ if (NOT MSVC)
 	target_link_libraries(web-tests --coverage)
 endif()
 
-add_test(Test tests)
+add_test(Test web-tests)
