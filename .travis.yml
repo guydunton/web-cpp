@@ -1,0 +1,20 @@
+language: cpp
+compiler: gcc
+dist: trusty
+
+before_install:
+  # C++17
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo apt-get update -qq
+
+install: 
+  # C++17
+  - sudo apt-get install -qq g++-6
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90
+
+script: 
+  - mkdir build && cd build
+  - CXX=/usr/bin/g++-5 CC=/usr/bin/gcc-5 cmake -D ENABLE_COVERAGE=TRUE ..
+  - make -j2
+  - ctest -j2
+  - bash <(curl -s https://codecov.io/bash) -x /usr/bin/gcov-5
