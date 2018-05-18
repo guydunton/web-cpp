@@ -17,4 +17,4 @@ script:
   - CXX=g++ CC=gcc cmake -D ENABLE_COVERAGE=TRUE ..
   - make -j2
   - ctest -j2
-  - bash <(curl -s https://codecov.io/bash) -x /usr/bin/gcov-5
+  - bash <(curl -s https://codecov.io/bash)
