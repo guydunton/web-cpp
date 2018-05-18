@@ -1,6 +1,11 @@
-cmake_minimum_required(VERSION 3.0)
-project(web-test)
+cmake_minimum_required(VERSION 3.8)
+project(web-cpp)
 
-add_executable(web-test main.cpp)
+if (NOT MSVC)
+	option(ENABLE_COVERAGE "Enable coverage reporting for gcc/clang" FALSE)
+endif()
 
-target_compile_features(web-test PRIVATE cxx_std_17)
+enable_testing()
+
+add_subdirectory(example)
+add_subdirectory(test)
