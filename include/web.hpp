@@ -74,7 +74,7 @@ namespace Web {
 		template <typename... Args>
 		HtmlBase(Attr&& attr, Args&&... args) noexcept :
 			streamFunc(dataStreamFunc<Args...>()),
-			data(std::tuple(std::forward<Args>(args)...)),
+			data(std::make_tuple(std::forward<Args>(args)...)),
 			attributes(std::forward<Attr>(attr))
 		{
 		}
@@ -82,7 +82,7 @@ namespace Web {
 		template <typename... Args>
 		HtmlBase(Args&&... args) noexcept :
 			streamFunc(dataStreamFunc<Args...>()),
-			data(std::tuple(std::forward<Args>(args)...))
+			data(std::make_tuple(std::forward<Args>(args)...))
 		{}
 
 		std::ostream& streamOut(std::ostream& str) const {
@@ -121,8 +121,8 @@ namespace Web {
 
 #define WEB_HTML_TAG_NO_VALIDATION(NAME, TAG) 		\
 class NAME : public HtmlBase<NAME> {				\
-	static constexpr const char* tag = TAG;	\
 public:												\
+	static constexpr const char* tag = TAG;	\
 	template <typename... Args>						\
 	explicit NAME(Args&&... args) noexcept :		\
 		HtmlBase<NAME>(std::forward<Args>(args)...)	\
@@ -136,9 +136,9 @@ public:												\
 	WEB_HTML_TAG_NO_VALIDATION(Body, "body");
 
 	class Html : public HtmlBase<Html> {
-		static constexpr const char* tag = "html";
-
 	public:
+		static constexpr const char* tag = "html";
+		
 		template <typename... Args>
 		explicit Html(Args&&... args) noexcept :
 			HtmlBase<Html>(std::forward<Args>(args)...)
