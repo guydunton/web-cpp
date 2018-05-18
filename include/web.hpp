@@ -1,8 +1,8 @@
 #pragma once
 #include <any>
 #include <tuple>
-#include <string_view>
-#include <iosfwd>
+#include <iostream>
+#include <vector>
 #include <variant>
 #include <optional>
 
@@ -121,7 +121,7 @@ namespace Web {
 
 #define WEB_HTML_TAG_NO_VALIDATION(NAME, TAG) 		\
 class NAME : public HtmlBase<NAME> {				\
-	static constexpr std::string_view tag = TAG;	\
+	static constexpr const char* tag = TAG;	\
 public:												\
 	template <typename... Args>						\
 	explicit NAME(Args&&... args) noexcept :		\
@@ -136,7 +136,7 @@ public:												\
 	WEB_HTML_TAG_NO_VALIDATION(Body, "body");
 
 	class Html : public HtmlBase<Html> {
-		static constexpr std::string_view tag = "html";
+		static constexpr const char* tag = "html";
 
 	public:
 		template <typename... Args>
