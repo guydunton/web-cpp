@@ -22,8 +22,22 @@ namespace Web {
 		return stream << "class=\"" << c.getName() << "\"";
 	}
 
+	class Id {
+		std::string name;
+	public:
+		explicit Id(std::string name) :
+			name(std::move(name))
+		{}
+		const std::string& getName() const {
+			return name;
+		}
+	};
+	std::ostream& operator<<(std::ostream& stream, const Id& id) {
+		return stream << "id=\"" << id.getName() << "\"";
+	}
+
 	class Attr {
-		using AttributesVariant = std::variant<Class>;
+		using AttributesVariant = std::variant<Class, Id>;
 		std::vector<AttributesVariant> children;
 
 	public:
