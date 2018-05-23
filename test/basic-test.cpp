@@ -24,6 +24,16 @@ TEST_CASE("P can contain text")
 	REQUIRE(paragraphString == "<p>Some text</p>");
 }
 
+TEST_CASE("Div can contain a br")
+{
+	auto d = Web::Div{
+		Web::Br{}
+	};
+
+	auto divText = toString(d);
+	REQUIRE(divText == "<div><br/></div>");
+}
+
 TEST_CASE("H1 produces correct text")
 {
 	auto header = Web::H1 {
@@ -79,4 +89,17 @@ TEST_CASE("Div can have a class attribute")
 
 	auto divText = toString(d);
 	REQUIRE(divText == R"(<div class="basic"></div>)");
+}
+
+TEST_CASE("Div can have multiple attributes")
+{
+	auto d = Web::Div {
+		Web::Attr {
+			Web::Class("basic"),
+			Web::Id("first")
+		}
+	};
+
+	auto divText = toString(d);
+	REQUIRE(divText == "<div class=\"basic\" id=\"first\"></div>");
 }
