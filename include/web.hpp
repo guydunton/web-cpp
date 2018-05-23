@@ -11,7 +11,7 @@ namespace Web {
 	class Class {
 		std::string name;
 	public:
-		Class(std::string name) :
+		explicit Class(std::string name) :
 			name(std::move(name))
 		{}
 		const std::string& getName() const {
@@ -28,7 +28,7 @@ namespace Web {
 
 	public:
 		template <typename... Args>
-		Attr(Args&&... args) {
+		explicit Attr(Args&&... args) {
 			(children.emplace_back(std::forward<Args>(args)), ...);
 		}
 
@@ -55,9 +55,16 @@ namespace Web {
 
 
 	template <typename T>
-	std::ostream& WriteToStream(std::ostream& stream, const T& data)
+	void WriteToStream(std::ostream& stream, const T& data)
 	{
-		return stream << data;
+		stream << data;
+	}
+
+	template <typename T>
+	void WriteToStream(std::ostream& stream, const std::vector<T>& data) {
+		for(const auto& d : data) {
+			stream << d;
+		}
 	}
 
 	template <typename T>

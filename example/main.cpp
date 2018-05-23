@@ -4,19 +4,6 @@
 #include <string>
 #include "web.hpp"
 
-namespace Web {
-
-	template<typename T> 
-	std::ostream& WriteToStream(std::ostream& stream, const std::vector<T>& data)
-	{
-		for (const auto& d : data)
-		{
-			stream << d;
-		}
-		return stream;
-	}
-}
-
 Web::Div createNameList(const std::vector<std::string>& names)
 {
 	std::vector<Web::P> paragraphs;
