@@ -4,6 +4,7 @@ project(web-tests)
 add_executable(web-tests 
 	main.cpp
 	basic-test.cpp
+    meta-tests.cpp
 )
 
 target_include_directories(web-tests PUBLIC ../include)

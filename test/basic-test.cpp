@@ -43,6 +43,15 @@ TEST_CASE("H1 produces correct text")
 	REQUIRE(headerText == "<h1>text</h1>");
 }
 
+TEST_CASE("H2 produces correct text")
+{
+	auto header = Web::H2 {
+		"text"
+	};
+	auto headerText = toString(header);
+	REQUIRE(headerText == "<h2>text</h2>");
+}
+
 TEST_CASE("HTML can contain a body tag")
 {
 	auto doc = Web::Html {

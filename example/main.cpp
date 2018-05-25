@@ -39,7 +39,9 @@ int main()
 
 	auto d = Web::Div{
 		Web::Attr {
-			Web::Class{ "center" }
+			Web::Class{ "center" },
+			//Web::Class{ "thingy" }, // This will not compile if uncommented
+			Web::Id{ "single" }
 		}
 	};
 

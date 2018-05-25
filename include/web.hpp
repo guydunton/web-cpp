@@ -3,8 +3,10 @@
 #include <tuple>
 #include <iostream>
 #include <vector>
-#include <variant>
 #include <optional>
+#include <cassert>
+#include "meta.hpp"
+
 
 namespace Web {
 
@@ -36,33 +38,27 @@ namespace Web {
 		return stream << "id=\"" << id.getName() << "\"";
 	}
 
+	template <typename... Args>
 	class Attr {
-		using AttributesVariant = std::variant<Class, Id>;
-		std::vector<AttributesVariant> children;
+
+		std::tuple<Args...> attributes;
 
 	public:
-		template <typename... Args>
-		explicit Attr(Args&&... args) {
-			(children.emplace_back(std::forward<Args>(args)), ...);
+		explicit Attr(Args&&... args) : 
+			attributes(std::make_tuple(std::forward<Args>(args)...))
+		{
+			static_assert(!contains_duplicates<Args...>::value, "Must not contain duplicates");
 		}
 
 		void print(std::ostream& stream) const {
-			for (auto begin = children.begin(), end = children.end();
-				begin != end; ++begin) {
-
-				std::visit([&stream](auto&& arg)
-				{
-					stream << arg;
-				}, *begin);
-
-				if (begin + 1 != end)
-				{
-					stream << " ";
-				}
-			}
+			std::apply([&stream](auto&&... args)
+			{
+				((stream << " " << args), ...);
+			}, attributes);
 		}
 	};
-	std::ostream& operator<<(std::ostream& stream, const Attr& d) {
+	template <typename... Args>
+	std::ostream& operator<<(std::ostream& stream, const Attr<Args...>& d) {
 		d.print(stream);
 		return stream;
 	}
@@ -73,7 +69,6 @@ namespace Web {
 	{
 		stream << data;
 	}
-
 	template <typename T>
 	void WriteToStream(std::ostream& stream, const std::vector<T>& data) {
 		for(const auto& d : data) {
@@ -88,15 +83,17 @@ namespace Web {
 		AnyStreamFunctionPtr streamFunc;
 		std::any data;
 
-		std::optional<Attr> attributes;
+		std::optional<std::any> attributes;
+		AnyStreamFunctionPtr attrStreamFuncPtr;
 
 	public:
 
-		template <typename... Args>
-		HtmlBase(Attr&& attr, Args&&... args) noexcept :
+		template <typename... Attributes, typename... Args>
+		HtmlBase(Attr<Attributes...>&& attr, Args&&... args) noexcept :
 			streamFunc(dataStreamFunc<Args...>()),
 			data(std::make_tuple(std::forward<Args>(args)...)),
-			attributes(std::forward<Attr>(attr))
+			attributes(std::make_tuple(std::forward<Attr<Attributes...>>(attr))),
+			attrStreamFuncPtr(dataStreamFunc<Attr<Attributes...>>())
 		{
 		}
 
@@ -110,7 +107,7 @@ namespace Web {
 			str << "<" << T::tag;
 			if (attributes)
 			{
-				str << " " << *attributes;
+				attrStreamFuncPtr(str, *attributes);
 			}
 			str << ">";
 			streamFunc(str, data);
@@ -124,11 +121,11 @@ namespace Web {
 
 			return [](std::ostream& stream, const std::any& data) -> std::ostream& {
 				try {
-					const auto& children = std::any_cast<const AnyType&>(data);
+					const AnyType& children = std::any_cast<const AnyType&>(data);
 					std::apply([&stream](const auto&... item) { (WriteToStream(stream, item), ...); }, children);
 				}
 				catch (std::bad_any_cast& /*e*/) {
-					stream << "Failed to evaluate children";
+					assert(false); // The types have not worked if we are here
 				}
 				return stream;
 			};
